@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"cortex-debug.JLinkGDBServerPath": "C:/Program Files/SEGGER/JLink_V884/JLinkGDBServerCL.exe",
+		"cortex-debug.gdbPath": "C:/ST/STM32CubeCLT_1.19.0/GNU-tools-for-STM32/bin/arm-none-eabi-gdb.exe",
+		"files.associations": {
+			"time.h": "c",
+			"ow.h": "c",
+			"ow_config.h": "c"
+		}
+	}
+}
