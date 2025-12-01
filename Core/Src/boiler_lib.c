@@ -68,7 +68,7 @@ boiler_config_t boiler_config = {
     .status = OK,
 };
 
-
+uint8_t consigne_temperature = 19;
 
 void feeder_cruise(void)
 {
@@ -183,8 +183,14 @@ void pump_cruise(void)
     osDelay(1000);
 }
 
+/**
+ * @brief for reliability reasons, the valve motor should not work for less than 1sec,
+ * thus the valve steps are divided according to the valve controller running time
+ *
+ */
 void valve_cruise(void)
 {
+    uint8_t expected_valve_position;
     if(boiler_config.mode == AUTOMATIC_MODE)
     {
         if ((boiler_config.temperature_water_out >= 80) || (boiler_config.temperature_water_in >= 80))
@@ -224,7 +230,6 @@ void set_valve_position(uint8_t new_angle)
     }
     instrument_valve.rate = new_angle;
 }
-
 
 void command_selection(uint8_t *command_string)
 {

@@ -29,6 +29,7 @@
 #define MANUAL_MODE             0
 #define AUTOMATIC_MODE          1
 
+#define ARA600_RUNNING_TIME 240 // time for the 3-way valve controller to make a full 90° rotation
 
 typedef enum {
   OK = 0,
@@ -66,7 +67,6 @@ typedef struct {
 /**
  * @brief function prototypes
  */
-
 void feeder_cruise(void);
 void fan_cruise(void);
 void pump_cruise(void);

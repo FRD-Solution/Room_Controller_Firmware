@@ -36,7 +36,7 @@
 /* USER CODE BEGIN OW_CONFIGURATION */
 
 #define OW_MAX_DATA_LEN     16
-#define OW_MAX_DEVICE       1
+#define OW_MAX_DEVICE       5
 #define OW_DUAL_PINS        0
 #if (OW_DUAL_PINS == 1)
 #define OW_INVERT_RX        0

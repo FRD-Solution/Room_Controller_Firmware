@@ -46,6 +46,7 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/boiler_lib.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/ds18b20.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Src/ow.c
 )
 

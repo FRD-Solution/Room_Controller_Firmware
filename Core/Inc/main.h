@@ -57,8 +57,6 @@ void ds18_tim_cb(TIM_HandleTypeDef *htim);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define GPIO_OW_Pin GPIO_PIN_0
-#define GPIO_OW_GPIO_Port GPIOA
 #define GPIO_Feeder_Output_Pin GPIO_PIN_2
 #define GPIO_Feeder_Output_GPIO_Port GPIOA
 #define PWM_Fan_Output_Pin GPIO_PIN_3
@@ -75,7 +73,9 @@ void ds18_tim_cb(TIM_HandleTypeDef *htim);
 /* USER CODE BEGIN Private defines */
 
 #define SWO true
+#ifdef DEBUG
 #define DEBUG_TASK true
+#endif
 
 /* USER CODE END Private defines */
 

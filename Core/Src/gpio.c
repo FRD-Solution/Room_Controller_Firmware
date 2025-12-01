@@ -49,18 +49,10 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_OW_Pin|GPIO_Feeder_Output_Pin|GPIO_Pump_Output_Pin|GPIO_Valve_Output_1_Pin
-                          |GPIO_Valve_Output_2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, GPIO_Feeder_Output_Pin|GPIO_Pump_Output_Pin|GPIO_Valve_Output_1_Pin|GPIO_Valve_Output_2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIO_LED_BUILTIN_GPIO_Port, GPIO_LED_BUILTIN_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin : GPIO_OW_Pin */
-  GPIO_InitStruct.Pin = GPIO_OW_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIO_OW_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : GPIO_Feeder_Output_Pin GPIO_Pump_Output_Pin GPIO_Valve_Output_1_Pin GPIO_Valve_Output_2_Pin */
   GPIO_InitStruct.Pin = GPIO_Feeder_Output_Pin|GPIO_Pump_Output_Pin|GPIO_Valve_Output_1_Pin|GPIO_Valve_Output_2_Pin;

@@ -30,8 +30,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <core_cm4.h>
-
-#include "ow.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,6 +54,8 @@ uint8_t FinalData[50];
 uint8_t rxData[50];
 uint8_t temp[2];
 uint8_t indx = 0;
+
+uint8_t uart_rx_state = 0;
 
 extern osEventFlagsId_t uartReceiveEventHandle;
 extern osMutexId_t usartMutexHandle;
@@ -86,28 +86,6 @@ int _write(int file, char *ptr, int len)
   return len;
 }
 #endif
-
-ow_handle_t ds18;
-/**
- * @brief ds18... temperature sensor OneWire com callback
- * 
- * @param htim timer user for one wire communication
- */
-void ds18_tim_cb(TIM_HandleTypeDef *htim)
-{
-    ow_callback(&ds18);
-}
-
-
-ow_init_t ow_init_struct = {
-  .tim_handle = &htim3,
-  .gpio = GPIO_OW_GPIO_Port,
-  .pin = GPIO_OW_Pin,
-  .tim_cb = ds18_tim_cb,
-  //.rom_id_filter = 0,
-};
-
-
 
 /* USER CODE END 0 */
 
@@ -144,16 +122,13 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
+  MX_UART4_Init();
   /* USER CODE BEGIN 2 */
   HAL_UART_Receive_DMA(&huart1, temp, 1);
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
   __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_4, 0);
   printf("RESTARTING MCU\n\r");
   fflush(stdout);
-  HAL_GPIO_WritePin(GPIO_OW_GPIO_Port, GPIO_OW_Pin, SET);
-  HAL_Delay(1000);
-  HAL_GPIO_WritePin(GPIO_OW_GPIO_Port, GPIO_OW_Pin, RESET);
-  ow_init(&ds18, &ow_init_struct);
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -228,6 +203,12 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+  if (huart == &huart4)
+  {
+    uart_rx_state = 0;
+    return;
+  }
+
   if (temp[0] == '/')
 	{
     memcpy(rxData+indx, temp, 1);

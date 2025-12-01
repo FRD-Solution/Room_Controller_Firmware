@@ -30,7 +30,7 @@
 #include <string.h>
 #include "usart.h"
 #include "boiler_lib.h"
-#include "ow.h"
+#include "ds18b20.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -65,7 +65,7 @@ extern instrument_t instrument_pump;
 extern instrument_t instrument_valve;
 extern boiler_config_t boiler_config;
 
-extern ow_handle_t ds18;
+float DS18B20_Temp;
 
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
@@ -117,6 +117,13 @@ const osThreadAttr_t inletTempTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for temperatureWatc */
+osThreadId_t temperatureWatcHandle;
+const osThreadAttr_t temperatureWatc_attributes = {
+    .name = "temperatureWatc",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t)osPriorityLow,
+};
 /* Definitions for feederAutoTimer */
 osTimerId_t feederAutoTimerHandle;
 const osTimerAttr_t feederAutoTimer_attributes = {
@@ -148,6 +155,7 @@ void StartFanTask(void *argument);
 void StartPumpTask(void *argument);
 void StartValveTask(void *argument);
 void StartInletTempTask(void *argument);
+void StartTemperatureWatchdogTask(void *argument);
 void CB_feederAutoTimer(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
@@ -207,6 +215,9 @@ void MX_FREERTOS_Init(void) {
   /* creation of inletTempTask */
   inletTempTaskHandle = osThreadNew(StartInletTempTask, NULL, &inletTempTask_attributes);
 
+  /* creation of temperatureWatc */
+  temperatureWatcHandle = osThreadNew(StartTemperatureWatchdogTask, NULL, &temperatureWatc_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
 #if DEBUG_TASK == true
   debugTaskHandle = osThreadNew(StartDebugTask, NULL, &debugTask_attributes);
@@ -239,6 +250,7 @@ void StartDefaultTask(void *argument)
     printf("\n\r#####################\n\r");
     printf("WATER OUT    - %d\n\r", boiler_config.temperature_water_out);
     printf("WATER IN     - %d\n\r", boiler_config.temperature_water_in);
+    printf("DS18B20      - %d\n\r", (int)DS18B20_Temp);
     printf("---------------------\n\r");
     printf("FEED ON      - %d\n\r", instrument_feeder.inst_SET);
     printf("FAN SPEED    - %d\n\r", instrument_fan.rate);
@@ -389,19 +401,40 @@ void StartInletTempTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    uint8_t data[16];
-    ow_update_rom_id(&ds18);
-    //while (ow_is_busy(&ds18));
-    osDelay(10);
-    ow_xfer(&ds18, 0x44, NULL, 0, 0);
-    osDelay(1000);
-    ow_xfer(&ds18, 0xBE, NULL, 0, 9);
-    //while (ow_is_busy(&ds18));
-    ow_read_resp(&ds18, data, 16);
-
+    osKernelLock();
+    DS18B20_ListRom();
+    // DS18B20_SampleTemp();              // Convert (Sample) Temperature Now
+    // DS18B20_Temp = DS18B20_ReadTemp(); // Read The Conversion Result Temperature Value
+    osKernelUnlock();
     osDelay(1000);
   }
   /* USER CODE END StartInletTempTask */
+}
+
+/* USER CODE BEGIN Header_StartTemperatureWatchdogTask */
+/**
+ * @brief Function implementing the temperatureWatc thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_StartTemperatureWatchdogTask */
+void StartTemperatureWatchdogTask(void *argument)
+{
+  /* USER CODE BEGIN StartTemperatureWatchdogTask */
+  /* Infinite loop */
+  for (;;)
+  {
+    if ((boiler_config.temperature_water_out >= 80) || (boiler_config.temperature_water_in >= 80))
+    {
+      boiler_config.status = ErrorWaterHot;
+      set_valve_position(90);
+      instrument_pump.rate = 3;
+      instrument_fan.status = fanOFF;
+      instrument_fan.rate = 0;
+      instrument_feeder.inst_SET = 0;
+    }
+  }
+  /* USER CODE END StartTemperatureWatchdogTask */
 }
 
 /* CB_feederAutoTimer function */
